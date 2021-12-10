@@ -102,9 +102,7 @@ export class Application extends React.Component {
         })}
       </Tbody>
     </TableComposable>
-                </div>
-
-                
+                </div>                
             )
         }
     }
