@@ -17,47 +17,85 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import cockpit from 'cockpit';
-import React from 'react';
-import { Alert, Card, CardTitle, CardBody, Brand, Spinner } from '@patternfly/react-core';
-import PeerTable from './PeerTable';
-
-let details = {};
+import cockpit from "cockpit";
+import React from "react";
+import {
+  Alert,
+  Card,
+  CardTitle,
+  CardBody,
+  Brand,
+  Spinner,
+  Page,
+  Masthead,
+  MastheadMain,
+  MastheadBrand,
+  MastheadContent,
+  PageSection,
+  PageSectionVariants,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+} from "@patternfly/react-core";
+import PeerTable from "./PeerTable.jsx";
 
 export class Application extends React.Component {
-    constructor() {
-        super();
-        this.setState({details: {
-            peers: []
-        }}); 
-        // cockpit.file('/etc/hostname').watch(content => {
-        //     this.setState({ hostname: content.trim() });
-        // });
+  constructor() {
+    super();
+    cockpit
+      .spawn(["enclave", "status", "--json"])
+      .then((result) => {
+        var statusDetails = JSON.parse(result);
+        this.setState({ details: statusDetails });
+      })
+      .catch(fail);
+    // cockpit.file('/etc/hostname').watch(content => {
+    //     this.setState({ hostname: content.trim() });
+    // });
+  }
+
+  DisplayContent() {
+    if (details == null) {
+      return <Spinner isSVG />;
+    } else {
+      const Header = (
+        <Masthead display={{ default: "stack" }} inset={{ default: "insetXs" }}>
+          <MastheadMain>
+            <MastheadBrand
+              href="https://patternfly.org"
+              onClick={() => console.log("clicked logo")}
+              target="_blank"
+            >
+              Logo
+            </MastheadBrand>
+          </MastheadMain>
+        </Masthead>
+      );
+
+      return (
+        <Page header={Header}>
+          <PageSection variant={PageSectionVariants.light}>
+            Section with light background
+          </PageSection>
+
+          <Brand src={pfLogo} alt="Patternfly Logo" />
+
+          <Card>
+            <CardTitle>
+                Client Peers
+            </CardTitle>
+            <CardBody>
+            <PeerTable details={this.state.details} />
+            </CardBody>
+          </Card>
+
+
+        </Page>
+      );
     }
+  }
 
-    DisplayContent() {
-        if (details == null) {
-            return <Spinner isSVG />
-        }
-        else {
-            return (
-                <div>
-                    <Brand src={pfLogo} alt="Patternfly Logo" />
-
-                    <Card>
-                        <CardTitle>Starter Kit</CardTitle>
-                        <CardBody>
-
-                        </CardBody>
-                    </Card>
-
-                    <PeerTable peers={this.state.peers} />
-                </div>                
-            )
-        }
-    }
-
-    render() {
-        return this.DisplayContent();
-    }
+  render() {
+    return this.DisplayContent();
+  }
 }

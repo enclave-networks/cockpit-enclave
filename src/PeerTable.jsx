@@ -32,7 +32,7 @@ export default class PeerTable extends Component {
           </Tr>
         </Thead>
         <Tbody>
-          {this.state.peers.map((peer, rowIndex) => {
+          {this.state.details.peers.map((peer, rowIndex) => {
             const isOddRow = (rowIndex + 1) % 2;
             const customStyle = {
               borderLeft: "3px solid var(--pf-global--primary-color--100)",
