@@ -1,11 +1,9 @@
 {
-    "requires": {
-        "cockpit": "137"
-    },
-
-    "tools": {
-        "index": {
-            "label": "Starter Kit"
+    "version": 0,
+    "menu": {
+        "enclave": {
+            "label": "Enclave",
+            "path": "index.html"
         }
     }
 }

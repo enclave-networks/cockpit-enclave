@@ -1,26 +1,6 @@
-/*
- * This file is part of Cockpit.
- *
- * Copyright (C) 2017 Red Hat, Inc.
- *
- * Cockpit is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- *
- * Cockpit is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
- */
-
 import cockpit from "cockpit";
 import React from "react";
 import {
-  Alert,
   Card,
   CardTitle,
   CardBody,
@@ -30,32 +10,31 @@ import {
   Masthead,
   MastheadMain,
   MastheadBrand,
-  MastheadContent,
   PageSection,
   PageSectionVariants,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
 } from "@patternfly/react-core";
-import PeerTable from "./PeerTable.jsx";
+import PeerTable from './PeerTable.jsx'
 
-export class Application extends React.Component {
+export default class Application extends React.Component {
   constructor() {
     super();
+
+    this.state = {
+    };
+
     cockpit
-      .spawn(["enclave", "status", "--json"])
-      .then((result) => {
-        var statusDetails = JSON.parse(result);
-        this.setState({ details: statusDetails });
-      })
-      .catch(fail);
-    // cockpit.file('/etc/hostname').watch(content => {
-    //     this.setState({ hostname: content.trim() });
-    // });
+    .spawn(["enclave", "status", "--json"])
+    .then(data => {
+      var statusDetails = JSON.parse(data);
+      this.setState({ details: statusDetails });
+    })
+    .catch(exception => {
+      console.log(exception);
+    }).bind(this);
   }
 
-  DisplayContent() {
-    if (details == null) {
+  render() {
+    if (this.state.details == null) {
       return <Spinner isSVG />;
     } else {
       const Header = (
@@ -78,14 +57,14 @@ export class Application extends React.Component {
             Section with light background
           </PageSection>
 
-          <Brand src={pfLogo} alt="Patternfly Logo" />
+          {/* <Brand src={pfLogo} alt="Patternfly Logo" /> */}
 
           <Card>
             <CardTitle>
-                Client Peers
+              Client Peers
             </CardTitle>
             <CardBody>
-            <PeerTable details={this.state.details} />
+              <PeerTable details={this.state.details} />
             </CardBody>
           </Card>
 
@@ -93,9 +72,5 @@ export class Application extends React.Component {
         </Page>
       );
     }
-  }
-
-  render() {
-    return this.DisplayContent();
   }
 }
