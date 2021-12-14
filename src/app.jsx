@@ -13,7 +13,7 @@ import {
   PageSection,
   PageSectionVariants,
 } from "@patternfly/react-core";
-import PeerTable from './PeerTable.jsx'
+import PeerTable from './peertable.jsx'
 
 export default class Application extends React.Component {
   constructor() {
@@ -22,6 +22,12 @@ export default class Application extends React.Component {
     this.state = {
     };
 
+    setInterval(function() {
+      this.getStatus();
+    }, 2000).bind(this);
+  }
+
+  getStatus() {
     cockpit
     .spawn(["enclave", "status", "--json"])
     .then(data => {
