@@ -11,8 +11,8 @@ import {
 import { Spinner } from "@patternfly/react-core";
 
 
-export default function PeerTable(props) {
-  if (props == null || props.details == null) {
+export default function PeerTable({ details }) {
+  if (details == null) {
     return <Spinner />;
   } else {
     return (
@@ -28,7 +28,7 @@ export default function PeerTable(props) {
           </Tr>
         </Thead>
         <Tbody>
-          {this.state.details.peers.map((peer, rowIndex) => {
+          {details.peers.map((peer, rowIndex) => {
             const isOddRow = (rowIndex + 1) % 2;
             const customStyle = {
               borderLeft: "3px solid var(--pf-global--primary-color--100)",
