@@ -2,7 +2,7 @@
     "version": 0,
     "menu": {
         "enclave": {
-            "label": "Enclave",
+            "label": "Enclave React",
             "path": "index.html"
         }
     }
