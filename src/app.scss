@@ -1,3 +1,16 @@
+body {
+    background-color: var(--pf-global--BackgroundColor--200);
+}
+
 p {
-    font-weight: bold;
+  font-weight: bold;
+}
+
+.flex__header {
+  text-align: center;
+  margin-left: 38%;
+}
+
+.card__peers {
+    margin: 5% 5%;
 }

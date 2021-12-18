@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import {
   TableComposable,
   Thead,
@@ -6,7 +6,6 @@ import {
   Tr,
   Th,
   Td,
-  Caption,
 } from "@patternfly/react-table";
 import { Spinner } from "@patternfly/react-core";
 
@@ -38,8 +37,7 @@ export default function PeerTable(props) {
     );
 
     return (
-      <TableComposable aria-label="Peers Table">
-        <Caption>Peers</Caption>
+      <TableComposable aria-label="Peers Table" variant="compact">
         <Thead noWrap>
           <Tr>
             <Th>Id</Th>

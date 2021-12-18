@@ -4,16 +4,14 @@ import {
   Card,
   CardTitle,
   CardBody,
-  Brand,
   Spinner,
   Page,
-  Masthead,
-  MastheadMain,
-  MastheadBrand,
   PageSection,
-  PageSectionVariants,
+  Flex,
+  FlexItem,
+  Divider,
 } from "@patternfly/react-core";
-import PeerTable from './peertable.jsx'
+import PeerTable from './peertable.jsx';
 
 
 
@@ -22,7 +20,6 @@ const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON
 export default function Application() {
   const [status, setStatus] = useState(undefined);
   const [hasErrored, setHasErrored] = useState(false);
-
 
   useEffect(() => {
     setInterval(() => {
@@ -36,37 +33,47 @@ export default function Application() {
   }, []);
 
   if (!status) {
-    return <Spinner isSVG />;
+    return <Spinner className="pf-u-text-align-center" isSVG />;
   } else {
+    status.Peers.shift();
+
+    var connectionCount = 0;
+    status.Peers.forEach(peer => {
+      if (peer.Tunnel != null) {
+        connectionCount++;
+      }
+    });
+
     return (
-      <Page header={Header}>
-        <PageSection variant={PageSectionVariants.light}>
-          Section with light background
+      <Page>
+        <PageSection>
+          <Flex className="flex__header">
+            <FlexItem>
+              <h1>Local Identity</h1>
+              <h2>{status.Profile.Certificate.SubjectDistinguishedName}</h2>
+            </FlexItem>
+            <Divider isVertical />
+            <FlexItem>
+              <h1>Local Address</h1>
+              <h2>{status.Profile.VirtualAddress}</h2>
+            </FlexItem>
+            <Divider isVertical />
+            <FlexItem>
+              <h1>Connections</h1>
+              <h2>{connectionCount + " Online"}</h2>
+            </FlexItem>
+          </Flex>
         </PageSection>
 
-        <Card>
-          <CardTitle>
-            Client Peers
-          </CardTitle>
-          <CardBody>
-            <PeerTable status={status} />
-          </CardBody>
-        </Card>
+          <Card className="card__peers">
+            <CardTitle>
+              Client Peers
+            </CardTitle>
+            <CardBody>
+              <PeerTable status={status} />
+            </CardBody>
+          </Card>
       </Page>
     );
   }
 }
-
-const Header = (
-  <Masthead display={{ default: "stack" }} inset={{ default: "insetXs" }}>
-    <MastheadMain>
-      <MastheadBrand
-        href="https://patternfly.org"
-        onClick={() => console.log("clicked logo")}
-        target="_blank"
-      >
-        Logo
-      </MastheadBrand>
-    </MastheadMain>
-  </Masthead>
-);
