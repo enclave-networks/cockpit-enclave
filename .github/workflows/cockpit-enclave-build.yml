@@ -41,7 +41,7 @@ jobs:
     - name: Create Tarbakll
       run: |
         mkdir cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}
-        cp dist cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}
+        cp -r dist/. cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}
         tar --create --file cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}
 
     - name: build RPM package
