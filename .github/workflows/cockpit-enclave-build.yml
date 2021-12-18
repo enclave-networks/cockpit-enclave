@@ -40,15 +40,15 @@ jobs:
 
     - name: Create Tarbakll
       run: |
-        mkdir cockpit-enclave-v${{ steps.gitversion.outputs.AssemblySemVer }}
-        cp -r dist/. cockpit-enclave-v${{ steps.gitversion.outputs.AssemblySemVer }}
-        tar --create --file cockpit-enclave-v${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz cockpit-enclave-v${{ steps.gitversion.outputs.AssemblySemVer }}
+        mkdir cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
+        cp -r dist/. cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
+        tar --create --file cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
 
     - name: build RPM package
       run: |
         mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/BUILDROOT ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
         cp build/cockpit-enclave.spec ~/rpmbuild/SPECS
-        cp cockpit-enclave-v${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz ~/rpmbuild/SOURCES
+        cp cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz ~/rpmbuild/SOURCES
         rpmbuild -bb --define="version ${{ steps.gitversion.outputs.AssemblySemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec      
 
     - name: Archive build packages
@@ -56,7 +56,7 @@ jobs:
       with:
         name: dist-without-markdown
         path: |
-          cockpit-enclave-v${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz
+          cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz
           ~/rpmbuild/RPMS/noarch/*.rpm
 
     - name: Create Release    
@@ -76,6 +76,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cockpit-enclave-v${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz
-        asset_name: cockpit-enclave-v${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz
+        asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz
+        asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz
         asset_content_type: application/x-tar
