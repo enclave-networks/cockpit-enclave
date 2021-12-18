@@ -54,7 +54,7 @@ jobs:
     - name: Archive build packages
       uses: actions/upload-artifact@v2
       with:
-        name: dist-without-markdown
+        name: cockpit-enclave-files
         path: |
           cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz
           ~/rpmbuild/RPMS/noarch/*.rpm
