@@ -29,11 +29,11 @@ jobs:
     - name: Setup Node (SDK)
       uses: actions/setup-node@v2
 
+    - name: Install Node Modules
+      run: npm i
+       
     - name: Run Make
-      run: make  
-
-    - name: Install Packages
-      run: npm i 
+      run: make 
 
     - name: Webpack Build
       run: npx webpack
