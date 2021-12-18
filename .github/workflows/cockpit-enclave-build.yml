@@ -39,7 +39,28 @@ jobs:
       run: npx webpack
 
     - name: Create Tarbakll
-      run: tar --create --file cokcpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz dist
+      run: |
+      mkdir cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}
+      cp dist cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}
+      tar --create --file cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}
+
+    - name: build RPM package
+      run: |
+        apt install -y rpmdevtools rpmlint
+        rpmdev-setuptree
+        cp build/cockpit-enclave.spec ~/rpmbuild/SPECS
+        cp cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz ~/rpmbuild/SOURCES
+        rpmbuild --define="version ${{ steps.gitversion.outputs.SemVer }}"
+        rpmbuild -bb ~/rpmbuild/SPECS/cockpit-enclave.spec
+      
+
+    - name: Archive build packages
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist-without-markdown
+        path: |
+          cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz
+          ~/rpmbuild/RPMS/noarch/*.rpm
 
     - name: Create Release    
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -58,6 +79,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cokcpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz
-        asset_name: cokcpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz
+        asset_path: ./cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz
+        asset_name: cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz
         asset_content_type: application/x-tar
