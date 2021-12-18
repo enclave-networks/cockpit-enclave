@@ -50,9 +50,7 @@ jobs:
         mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/BUILDROOT ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
         cp build/cockpit-enclave.spec ~/rpmbuild/SPECS
         cp cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz ~/rpmbuild/SOURCES
-        rpmbuild --define="version ${{ steps.gitversion.outputs.SemVer }}"
-        rpmbuild -bb ~/rpmbuild/SPECS/cockpit-enclave.spec
-      
+        rpmbuild -bb --define="version ${{ steps.gitversion.outputs.SemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec      
 
     - name: Archive build packages
       uses: actions/upload-artifact@v2
