@@ -46,7 +46,7 @@ jobs:
 
     - name: build RPM package
       run: |
-        sudo apt install -y rpmdevtools rpmlint
+        sudo apt install -y rpm
         rpmdev-setuptree
         cp build/cockpit-enclave.spec ~/rpmbuild/SPECS
         cp cockpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz ~/rpmbuild/SOURCES
