@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -31,7 +30,7 @@ jobs:
 
     - name: Install Node Modules
       run: npm i
-       
+
     - name: Run Make
       run: make 
 
@@ -39,7 +38,7 @@ jobs:
       run: npx webpack
 
     - name: Create Tarbakll
-      run: tar --create --file Dist-v${{ steps.gitversion.outputs.SemVer }}.tar.gz dist
+      run: tar --create --file cokcpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz dist
 
     - name: Create Release    
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -50,3 +49,14 @@ jobs:
         tag_name: v${{ steps.gitversion.outputs.SemVer }}
         release_name: Release v${{ steps.gitversion.outputs.SemVer }}
         body: Latest SDK API Release
+
+    - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./cokcpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz
+          asset_name: cokcpit-enclave-v${{ steps.gitversion.outputs.SemVer }}.tar.gz
+          asset_content_type: application/x-tar
