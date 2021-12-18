@@ -13,8 +13,6 @@ import {
 } from "@patternfly/react-core";
 import PeerTable from './peertable.jsx';
 
-
-
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
 
 export default function Application() {
@@ -31,9 +29,9 @@ export default function Application() {
         });
     }, 2000);
   }, []);
-
+  //!status
   if (!status) {
-    return <Spinner className="pf-u-text-align-center" isSVG />;
+    return <Spinner className="spinner" isSVG />;
   } else {
     status.Peers.shift();
 

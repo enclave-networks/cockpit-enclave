@@ -7,14 +7,12 @@ import {
   Th,
   Td,
 } from "@patternfly/react-table";
-import { Spinner } from "@patternfly/react-core";
 
 
 export default function PeerTable(props) {
   if (!props.status.Peers) {
-    return <Spinner />;
+    return <div></div>;
   } else {
-    // Remove Discovery Service
     var tableRows = props.status.Peers.map((peer, rowIndex) => {
       const isOddRow = (rowIndex + 1) % 2;
       const customStyle = {
