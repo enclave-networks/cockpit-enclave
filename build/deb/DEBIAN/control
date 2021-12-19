@@ -1,0 +1,7 @@
+Package: cockpit-enclave
+Version: 1.0.0
+Maintainer: Enclave <you@example.com>
+Description: My test package, please ignore
+Homepage: https://github.com/enclave-networks/cockpit-enclave
+Architecture: all
+Depends: cockpit
