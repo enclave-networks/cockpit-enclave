@@ -59,7 +59,7 @@ jobs:
       with:
         name: cockpit-enclave-files
         path: |
-          ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+          ~/rpmbuild/RPMS/noarch/*.rpm
           ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
     - name: Create Release    
@@ -79,7 +79,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+        asset_path: ~/rpmbuild/RPMS/noarch/*.rpm
         asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
         asset_content_type: application/octet-stream
 
