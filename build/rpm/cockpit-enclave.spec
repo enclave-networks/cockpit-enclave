@@ -11,7 +11,7 @@ Source0: %{name}-%{version}.tar.gz
 Requires: cockpit bash
 
 %description
-A plugin to montiro enclave status in cockpit
+A plugin to monitor Enclave in cockpit
 
 %prep
 %setup -q
