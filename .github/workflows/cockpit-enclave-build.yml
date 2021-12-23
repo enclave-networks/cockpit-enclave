@@ -46,7 +46,8 @@ jobs:
         mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/BUILDROOT ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
         cp build/rpm/cockpit-enclave.spec ~/rpmbuild/SPECS
         cp cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz ~/rpmbuild/SOURCES
-        rpmbuild -bb --define="version ${{ steps.gitversion.outputs.AssemblySemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec      
+        rpmbuild -bb --define="version ${{ steps.gitversion.outputs.AssemblySemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec
+        cp -r ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
 
     - name: Build DEB Package
       run: |
@@ -60,7 +61,7 @@ jobs:
       with:
         name: cockpit-enclave-files
         path: |
-          ~/rpmbuild/RPMS/noarch/*.rpm
+          ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
           ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
     - name: Create Release 
@@ -81,7 +82,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm
+        asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
         asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
         asset_content_type: application/octet-stream
 
