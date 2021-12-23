@@ -13,12 +13,15 @@ import {
 } from "@patternfly/react-core";
 import PeerTable from './peer-table.jsx';
 import NotRunning from "./not-running.jsx";
+import Enrol from "./enrol.jsx";
 
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
+const getProfileCount = () => cockpit.spawn(["sudo", "ls -1", "/etc/enclave/profiles/", "| wc -l"]);
 
 export default function Application() {
   const [status, setStatus] = useState(undefined);
   const [hasErrored, setHasErrored] = useState(false);
+  const [needsToEnrol, setNeedsToEnrol] = useState(false);
 
   useEffect(() => {
     setInterval(() => {
@@ -29,15 +32,24 @@ export default function Application() {
           setHasErrored(true);
         });
     }, 2000);
+
+    getProfileCount().then(result => {
+      if (result === 0){
+        setNeedsToEnrol(true);
+      }
+    });
   }, []);
+
   if (!status) {
     return <Spinner className="spinner" isSVG />;
   } else if (status.includes("is not running")) {
+    //will display the same message if not running need to check if a profile file exists for enrol /etc/enclave/profiles
     return <NotRunning />;
+  } else if (needsToEnrol){
+    return <Enrol setNeedsToEnrol={setNeedsToEnrol} />
   } else {
-    status.Peers.shift();
-
-    var connectionCount = 0;
+    removeDiscoveryFromArray();
+    let connectionCount = 0;
     status.Peers.forEach(peer => {
       if (peer.Tunnel != null) {
         connectionCount++;
@@ -77,4 +89,12 @@ export default function Application() {
       </Page>
     );
   }
+}
+
+function removeDiscoveryFromArray(status){
+  status.Peers = status.Peers.filter(obj => obj.name !== "discover.enclave.io");
+}
+
+function needsToEnrol(){
+
 }

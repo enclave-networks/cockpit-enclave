@@ -1,7 +1,6 @@
 import { Page } from "@patternfly/react-core";
 import cockpit from "cockpit";
 import React, { useState, useEffect } from "react";
-//Profile 'Universe' is not running.
 
 const [exception, setException] = useState(undefined);
 
