@@ -47,7 +47,7 @@ jobs:
         cp build/rpm/cockpit-enclave.spec ~/rpmbuild/SPECS
         cp cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz ~/rpmbuild/SOURCES
         rpmbuild -bb --define="version ${{ steps.gitversion.outputs.AssemblySemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec
-        cp -r ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm ./~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm    
+        cp -r ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm    
 
     - name: Build DEB Package
       run: |
