@@ -49,9 +49,32 @@ function CreateTableRows(peer, rowIndex) {
     >
       <Td>{peer.Name}</Td>
       <Td>{peer.Description}</Td>
-      <Td>{peer.Tunnel ? peer.Tunnel.ProtocolEndPoint : "Down"}</Td>
-      <Td>{peer.RoundTripTime ?? ""}</Td>
+      <Td>{formatEndPoint(peer.Tunnel)}</Td>
+      <Td>{formatPing(peer?.RoundTripTime)}</Td>
       <Td>{peer.VirtualAddress ?? ""}</Td>
     </Tr>
+  );
+}
+
+function formatPing(roundTripTime){
+  if (roundTripTime === -1){
+    return "";
+  }
+
+  let removeDecimal = roundTripTime.substring(2);
+  let asNumber = parseInt(removeDecimal);
+
+  return `${asNumber}ms`;
+}
+
+function formatEndPoint(tunnel){
+  if (!tunnel){
+    return (
+      <Label color="red">Down</Label>
+    );
+  }
+
+  return (
+    <Label color="green">tunnel.ProtocolEndPoint</Label>
   );
 }
