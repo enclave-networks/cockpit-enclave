@@ -1,0 +1,96 @@
+name: Cockpit Enclave Build
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.x'
+
+    - name: Determine Version
+      id:   gitversion
+      uses: gittools/actions/gitversion/execute@v0.9.7
+              
+    - name: Setup Node (SDK)
+      uses: actions/setup-node@v2
+
+    - name: Install Node Modules
+      run: npm i
+
+    - name: Run Make
+      run: make 
+
+    - name: Webpack Build
+      run: npx webpack
+
+    - name: build RPM package
+      run: |
+        mkdir cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
+        cp -r dist/. cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
+        tar --create --file cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
+        mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/BUILDROOT ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
+        cp build/rpm/cockpit-enclave.spec ~/rpmbuild/SPECS
+        cp cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz ~/rpmbuild/SOURCES
+        rpmbuild -bb --define="version ${{ steps.gitversion.outputs.AssemblySemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec      
+
+    - name: Build DEB Package
+      run: |
+        mkdir -p build/deb/DEBIAN/usr/share/cockpit/enclave
+        cp -r dist/. build/deb/DEBIAN/usr/share/cockpit/enclave
+        sed -i 's/{{version}}/${{ steps.gitversion.outputs.AssemblySemVer }}/g' ./build/deb/DEBIAN/control
+        dpkg -b ./build/deb ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+
+    - name: Archive build packages
+      uses: actions/upload-artifact@v2
+      with:
+        name: cockpit-enclave-files
+        path: |
+          ~/rpmbuild/RPMS/noarch/*.rpm
+          ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+
+    - name: Create Release    
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.gitversion.outputs.AssemblySemVer }}
+        release_name: Release v${{ steps.gitversion.outputs.AssemblySemVer }}
+        body: Latest SDK API Release
+
+    - name: Upload RPM Release Asset        
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ~/rpmbuild/RPMS/noarch/*.rpm
+        asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+        asset_content_type: application/octet-stream
+
+    - name: Upload Deb Release Asset        
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+        asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+        asset_content_type: application/octet-stream    
