@@ -46,7 +46,8 @@ jobs:
         mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/BUILDROOT ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
         cp build/rpm/cockpit-enclave.spec ~/rpmbuild/SPECS
         cp cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz ~/rpmbuild/SOURCES
-        rpmbuild -bb --define="version ${{ steps.gitversion.outputs.AssemblySemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec      
+        rpmbuild -bb --define="version ${{ steps.gitversion.outputs.AssemblySemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec
+        cp -r ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm ./~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm    
 
     - name: Build DEB Package
       run: |
@@ -60,7 +61,7 @@ jobs:
       with:
         name: cockpit-enclave-files
         path: |
-          ~/rpmbuild/RPMS/noarch/*.rpm
+          ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm
           ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
     - name: Create Release 
