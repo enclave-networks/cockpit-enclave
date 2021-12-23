@@ -3,7 +3,7 @@ import cockpit from "cockpit";
 import React, { useState, useEffect } from "react";
 
 
-export default function NotRunning({ setIsNotRunning }) {
+export default function NotRunning({ setIsRunning, setHasBeenStartedByCockpit }) {
     const [exception, setException] = useState(undefined);
 
     return (
@@ -14,7 +14,7 @@ export default function NotRunning({ setIsNotRunning }) {
                         Enclave Isn't Running
                     </CardTitle>
                     <CardBody>
-                        <Button variant="primary" onClick={() => startEnclave(setException, setIsNotRunning)}>Start Enclave</Button>
+                        <Button variant="primary" onClick={() => startEnclave(setException, setIsRunning, setHasBeenStartedByCockpit)}>Start Enclave</Button>
                         <p>{exception?.message ?? ""}</p>
                     </CardBody>
                 </Card>
@@ -23,10 +23,11 @@ export default function NotRunning({ setIsNotRunning }) {
     );
 }
 
-function startEnclave(setException, setIsNotRunning) {
+function startEnclave(setException, setIsRunning, setHasBeenStartedByCockpit) {
     cockpit.spawn(["enclave", "start"])
         .then(() => {
-            setIsNotRunning(false);
+            setIsRunning(true);
+            setHasBeenStartedByCockpit(true);
         })
         .catch(exception => {
             setException(exception);

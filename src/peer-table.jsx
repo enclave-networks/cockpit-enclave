@@ -1,4 +1,5 @@
 import React from "react";
+import { Label } from "@patternfly/react-core";
 import {
   TableComposable,
   Thead,
@@ -57,14 +58,13 @@ function CreateTableRows(peer, rowIndex) {
 }
 
 function formatPing(roundTripTime){
-  if (roundTripTime === -1){
+  if (!roundTripTime || roundTripTime === -1){
     return "";
   }
 
-  let removeDecimal = roundTripTime.substring(2);
-  let asNumber = parseInt(removeDecimal);
+  let fullNumber = roundTripTime * 100;
 
-  return `${asNumber}ms`;
+  return `${fullNumber.toFixed()}ms`;
 }
 
 function formatEndPoint(tunnel){
@@ -75,6 +75,6 @@ function formatEndPoint(tunnel){
   }
 
   return (
-    <Label color="green">tunnel.ProtocolEndPoint</Label>
+    <Label color="green">{tunnel.ProtocolEndPoint}</Label>
   );
 }

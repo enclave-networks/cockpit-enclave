@@ -21,16 +21,25 @@ const getProfileCount = () => cockpit.spawn(["sudo", "ls -1", "/etc/enclave/prof
 export default function Application() {
   const [status, setStatus] = useState(undefined);
   const [needsToEnrol, setNeedsToEnrol] = useState(false);
-  const [isNotRunning, setIsNotRunning] = useState(false);
+  const [isRunning, setIsRunning] = useState(true);
+  const [hasBeenStartedByCockpit, setHasBeenStartedByCockpit] = useState(false);
+  
 
   useEffect(() => {
     setInterval(() => {
       getStatus()
-        .then(result => setStatus(result))
+        .then(result => { 
+          result.Peers = removeDiscoveryFromArray(result);
+          setStatus(result);
+          setHasBeenStartedByCockpit(false);
+        })
         .catch(err => {
-          setIsNotRunning(true);
+          if (hasBeenStartedByCockpit){
+            return;
+          }
+          setIsRunning(false);
         });
-    }, 1000);
+    }, 2000);
 
     getProfileCount().then(result => {
       if (result === 0) {
@@ -43,14 +52,13 @@ export default function Application() {
     return <Enrol setNeedsToEnrol={setNeedsToEnrol} />
   } 
 
-  if (isNotRunning) {
-    return <NotRunning setIsNotRunning={setIsNotRunning} />;
+  if (!isRunning) {
+    return <NotRunning setIsRunning={setIsRunning} setHasBeenStartedByCockpit={setHasBeenStartedByCockpit} />;
   } 
 
   if (!status) {
     return <Spinner className="spinner" isSVG />;
   } else {
-    removeDiscoveryFromArray(status);
     let connectionCount = 0;
     status.Peers.forEach(peer => {
       if (peer.Tunnel != null) {
@@ -94,5 +102,5 @@ export default function Application() {
 }
 
 function removeDiscoveryFromArray(status) {
-  status.Peers = status.Peers.filter(obj => obj.Description !== "discover.enclave.io");
+  return status.Peers.filter(obj => obj.Description !== "discover.enclave.io");
 }
