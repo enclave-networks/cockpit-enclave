@@ -61,7 +61,7 @@ jobs:
       with:
         name: cockpit-enclave-files
         path: |
-          ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm
+          ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm
           ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
     - name: Create Release 
