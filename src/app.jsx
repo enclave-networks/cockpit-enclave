@@ -20,35 +20,37 @@ const getProfileCount = () => cockpit.spawn(["sudo", "ls -1", "/etc/enclave/prof
 
 export default function Application() {
   const [status, setStatus] = useState(undefined);
-  const [hasErrored, setHasErrored] = useState(false);
   const [needsToEnrol, setNeedsToEnrol] = useState(false);
+  const [isNotRunning, setIsNotRunning] = useState(false);
 
   useEffect(() => {
     setInterval(() => {
       getStatus()
         .then(result => setStatus(result))
         .catch(err => {
-          console.log(err);
-          setHasErrored(true);
+          setIsNotRunning(true);
         });
-    }, 2000);
+    }, 1000);
 
     getProfileCount().then(result => {
-      if (result === 0){
+      if (result === 0) {
         setNeedsToEnrol(true);
       }
     });
   }, []);
 
+  if (needsToEnrol) {
+    return <Enrol setNeedsToEnrol={setNeedsToEnrol} />
+  } 
+
+  if (isNotRunning) {
+    return <NotRunning setIsNotRunning={setIsNotRunning} />;
+  } 
+
   if (!status) {
     return <Spinner className="spinner" isSVG />;
-  } else if (status.includes("is not running")) {
-    //will display the same message if not running need to check if a profile file exists for enrol /etc/enclave/profiles
-    return <NotRunning />;
-  } else if (needsToEnrol){
-    return <Enrol setNeedsToEnrol={setNeedsToEnrol} />
   } else {
-    removeDiscoveryFromArray();
+    removeDiscoveryFromArray(status);
     let connectionCount = 0;
     status.Peers.forEach(peer => {
       if (peer.Tunnel != null) {
@@ -91,10 +93,6 @@ export default function Application() {
   }
 }
 
-function removeDiscoveryFromArray(status){
-  status.Peers = status.Peers.filter(obj => obj.name !== "discover.enclave.io");
-}
-
-function needsToEnrol(){
-
+function removeDiscoveryFromArray(status) {
+  status.Peers = status.Peers.filter(obj => obj.Description !== "discover.enclave.io");
 }

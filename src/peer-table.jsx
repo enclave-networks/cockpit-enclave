@@ -47,7 +47,7 @@ function CreateTableRows(peer, rowIndex) {
       className={isOddRow ? "odd-row-class" : "even-row-class"}
       style={isOddRow ? customStyle : {}}
     >
-      <Td>{peer.name}</Td>
+      <Td>{peer.Name}</Td>
       <Td>{peer.Description}</Td>
       <Td>{peer.Tunnel ? peer.Tunnel.ProtocolEndPoint : "Down"}</Td>
       <Td>{peer.RoundTripTime ?? ""}</Td>

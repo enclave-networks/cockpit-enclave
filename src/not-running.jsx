@@ -1,10 +1,11 @@
-import { Page } from "@patternfly/react-core";
+import { Page, PageSection, Card, CardTitle, CardBody, Button } from "@patternfly/react-core";
 import cockpit from "cockpit";
 import React, { useState, useEffect } from "react";
 
-const [exception, setException] = useState(undefined);
 
-export default function NotRunning() {
+export default function NotRunning({ setIsNotRunning }) {
+    const [exception, setException] = useState(undefined);
+
     return (
         <Page>
             <PageSection>
@@ -13,8 +14,8 @@ export default function NotRunning() {
                         Enclave Isn't Running
                     </CardTitle>
                     <CardBody>
-                        <Button variant="primary" onClick={() => startEnclave()}>Start Enclave</Button>
-                        <p>{!exception ? exception.message : ""}</p>
+                        <Button variant="primary" onClick={() => startEnclave(setException, setIsNotRunning)}>Start Enclave</Button>
+                        <p>{exception?.message ?? ""}</p>
                     </CardBody>
                 </Card>
             </PageSection>
@@ -22,11 +23,12 @@ export default function NotRunning() {
     );
 }
 
-function startEnclave() {
-    useEffect(() => {
-        cockpit.spawn(["enclave", "start"])
-            .catch(exception => {
-                setException(exception);
-            });
-    }, []);
+function startEnclave(setException, setIsNotRunning) {
+    cockpit.spawn(["enclave", "start"])
+        .then(() => {
+            setIsNotRunning(false);
+        })
+        .catch(exception => {
+            setException(exception);
+        });
 }
