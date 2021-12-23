@@ -11,7 +11,8 @@ import {
   FlexItem,
   Divider,
 } from "@patternfly/react-core";
-import PeerTable from './peertable.jsx';
+import PeerTable from './peer-table.jsx';
+import NotRunning from "./not-running.jsx";
 
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
 
@@ -29,9 +30,10 @@ export default function Application() {
         });
     }, 2000);
   }, []);
-  //!status
   if (!status) {
     return <Spinner className="spinner" isSVG />;
+  } else if (status.includes("is not running")) {
+    return <NotRunning />;
   } else {
     status.Peers.shift();
 
@@ -62,7 +64,7 @@ export default function Application() {
             </FlexItem>
           </Flex>
         </PageSection>
-
+        <PageSection>
           <Card className="card__peers">
             <CardTitle>
               Client Peers
@@ -71,6 +73,7 @@ export default function Application() {
               <PeerTable status={status} />
             </CardBody>
           </Card>
+        </PageSection>
       </Page>
     );
   }
