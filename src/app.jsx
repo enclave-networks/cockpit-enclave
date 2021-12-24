@@ -11,31 +11,55 @@ import {
   FlexItem,
   Divider,
 } from "@patternfly/react-core";
-import PeerTable from './peertable.jsx';
+import PeerTable from './peer-table.jsx';
+import NotRunning from "./not-running.jsx";
+import Enrol from "./enrol.jsx";
 
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
+const getProfileCount = () => cockpit.spawn(["sudo", "ls -1", "/etc/enclave/profiles/", "| wc -l"]);
 
 export default function Application() {
   const [status, setStatus] = useState(undefined);
-  const [hasErrored, setHasErrored] = useState(false);
+  const [needsToEnrol, setNeedsToEnrol] = useState(false);
+  const [isRunning, setIsRunning] = useState(true);
+  const [hasBeenStartedByCockpit, setHasBeenStartedByCockpit] = useState(false);
+  
 
   useEffect(() => {
     setInterval(() => {
       getStatus()
-        .then(result => setStatus(result))
+        .then(result => { 
+          result.Peers = removeDiscoveryFromArray(result);
+          setStatus(result);
+          setHasBeenStartedByCockpit(false);
+        })
         .catch(err => {
-          console.log(err);
-          setHasErrored(true);
+          if (hasBeenStartedByCockpit){
+            return;
+          }
+          setIsRunning(false);
         });
     }, 2000);
+
+    getProfileCount().then(result => {
+      if (result === 0) {
+        setNeedsToEnrol(true);
+      }
+    });
   }, []);
-  //!status
+
+  if (needsToEnrol) {
+    return <Enrol setNeedsToEnrol={setNeedsToEnrol} />
+  } 
+
+  if (!isRunning) {
+    return <NotRunning setIsRunning={setIsRunning} setHasBeenStartedByCockpit={setHasBeenStartedByCockpit} />;
+  } 
+
   if (!status) {
     return <Spinner className="spinner" isSVG />;
   } else {
-    status.Peers.shift();
-
-    var connectionCount = 0;
+    let connectionCount = 0;
     status.Peers.forEach(peer => {
       if (peer.Tunnel != null) {
         connectionCount++;
@@ -62,7 +86,7 @@ export default function Application() {
             </FlexItem>
           </Flex>
         </PageSection>
-
+        <PageSection>
           <Card className="card__peers">
             <CardTitle>
               Client Peers
@@ -71,7 +95,12 @@ export default function Application() {
               <PeerTable status={status} />
             </CardBody>
           </Card>
+        </PageSection>
       </Page>
     );
   }
+}
+
+function removeDiscoveryFromArray(status) {
+  return status.Peers.filter(obj => obj.Description !== "discover.enclave.io");
 }
