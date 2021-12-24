@@ -51,8 +51,8 @@ jobs:
 
     - name: Build DEB Package
       run: |
-        mkdir -p build/deb/DEBIAN/usr/share/cockpit/enclave
-        cp -r dist/. build/deb/DEBIAN/usr/share/cockpit/enclave
+        mkdir -p build/deb/usr/share/cockpit/enclave
+        cp -r dist/. build/deb/usr/share/cockpit/enclave
         sed -i 's/{{version}}/${{ steps.gitversion.outputs.AssemblySemVer }}/g' ./build/deb/DEBIAN/control
         dpkg -b ./build/deb ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
