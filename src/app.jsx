@@ -17,7 +17,6 @@ import NotRunning from "./not-running.jsx";
 import Enrol from "./enrol.jsx";
 
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
-const tryThing = () => cockpit.spawn(['find', '/etc/enclave/profiles', '-mindepth', '1', '-type', 'f', '-name', '"*.profile"'], { superuser: "require" })
 
 export default function Application() {
   const [status, setStatus] = useState(undefined);
@@ -25,19 +24,7 @@ export default function Application() {
   const [hasBeenStartedByCockpit, setHasBeenStartedByCockpit] = useState(false);
   const [shouldEnrol, setShouldEnrol] = useState(false);
 
-
   useEffect(() => {
-    tryThing()
-      .stream(data => {
-        console.log(data);
-      })
-      .then(result => {
-        console.log(result);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-
     setInterval(() => {
       getStatus()
         .then(result => {
