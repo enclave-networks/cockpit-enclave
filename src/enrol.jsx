@@ -3,7 +3,7 @@ import cockpit from "cockpit";
 import React from "react";
 
 //will display the same message if not running need to check if a profile file exists for enrol /etc/enclave/profiles
-export default function Enrol({setShouldEnrol}) {
+export default function Enrol({ setShouldEnrol }) {
     let value = "";
     return (
         <Page>
@@ -22,13 +22,13 @@ export default function Enrol({setShouldEnrol}) {
     );
 }
 
-function enrol(value, {setShouldEnrol}){
+function enrol(value, { setShouldEnrol }) {
     cockpit
-    .spawn(['enclave', 'enrol', value], {superuser: "require"})
-    .then(() => {
-        setShouldEnrol(false);
-    })
-    .catch(err => {
-        console.log(err);
-    });
+        .spawn(['enclave', 'enrol', value], { superuser: "require" })
+        .then(() => {
+            setShouldEnrol(false);
+        })
+        .catch(err => {
+            console.log(err);
+        });
 }

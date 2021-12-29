@@ -17,6 +17,7 @@ import NotRunning from "./not-running.jsx";
 import Enrol from "./enrol.jsx";
 
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
+const tryThing = () => cockpit.spawn(['find', '/etc/enclave/profiles', '-mindepth', '1', '-type', 'f', '-name', '"*.profile"'], { superuser: "require" })
 
 export default function Application() {
   const [status, setStatus] = useState(undefined);
@@ -26,6 +27,17 @@ export default function Application() {
 
 
   useEffect(() => {
+    tryThing()
+      .stream(data => {
+        console.log(data);
+      })
+      .then(result => {
+        console.log(result);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
     setInterval(() => {
       getStatus()
         .then(result => {
@@ -68,7 +80,7 @@ export default function Application() {
     return (
       <Page>
         <PageSection>
-        <Button variant="primary" onClick={() => {setShouldEnrol(true)}}>Enrol System</Button>
+          <Button variant="primary" onClick={() => { setShouldEnrol(true) }}>Enrol System</Button>
           <Flex className="flex__header">
             <FlexItem>
               <h1>Local Identity</h1>
