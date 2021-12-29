@@ -31,12 +31,17 @@ export default function Application() {
         .then(result => { 
           result.Peers = removeDiscoveryFromArray(result);
           setStatus(result);
-          setHasBeenStartedByCockpit(false);
+
+          // Set a 1 second timeout to avoid reloading the getStatus before the service is up
+          if (hasBeenStartedByCockpit){
+            setTimeout(setHasBeenStartedByCockpit(false), 1000);
+          }
         })
         .catch(err => {
           if (hasBeenStartedByCockpit){
             return;
           }
+          
           setIsRunning(false);
         });
     }, 2000);

@@ -51,8 +51,8 @@ function CreateTableRows(peer, rowIndex) {
       <Td>{peer.Name}</Td>
       <Td>{peer.Description}</Td>
       <Td>{formatEndPoint(peer.Tunnel)}</Td>
-      <Td>{formatPing(peer?.RoundTripTime)}</Td>
-      <Td>{peer.VirtualAddress ?? ""}</Td>
+      <Td>{peer.Tunnel === null ? "" : formatPing(peer?.RoundTripTime)}</Td>
+      <Td>{peer.Tunnel === null ? "" : peer.VirtualAddress}</Td>
     </Tr>
   );
 }
