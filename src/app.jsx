@@ -10,56 +10,50 @@ import {
   Flex,
   FlexItem,
   Divider,
+  Button,
 } from "@patternfly/react-core";
 import PeerTable from './peer-table.jsx';
 import NotRunning from "./not-running.jsx";
 import Enrol from "./enrol.jsx";
 
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
-const getProfileCount = () => cockpit.spawn(["sudo", "ls -1", "/etc/enclave/profiles/", "| wc -l"]);
 
 export default function Application() {
   const [status, setStatus] = useState(undefined);
-  const [needsToEnrol, setNeedsToEnrol] = useState(false);
   const [isRunning, setIsRunning] = useState(true);
   const [hasBeenStartedByCockpit, setHasBeenStartedByCockpit] = useState(false);
-  
+  const [shouldEnrol, setShouldEnrol] = useState(false);
+
 
   useEffect(() => {
     setInterval(() => {
       getStatus()
-        .then(result => { 
+        .then(result => {
           result.Peers = removeDiscoveryFromArray(result);
           setStatus(result);
 
           // Set a 1 second timeout to avoid reloading the getStatus before the service is up
-          if (hasBeenStartedByCockpit){
+          if (hasBeenStartedByCockpit) {
             setTimeout(setHasBeenStartedByCockpit(false), 1000);
           }
         })
         .catch(err => {
-          if (hasBeenStartedByCockpit){
+          if (hasBeenStartedByCockpit) {
             return;
           }
-          
+
           setIsRunning(false);
         });
     }, 2000);
-
-    getProfileCount().then(result => {
-      if (result === 0) {
-        setNeedsToEnrol(true);
-      }
-    });
   }, []);
 
-  if (needsToEnrol) {
-    return <Enrol setNeedsToEnrol={setNeedsToEnrol} />
-  } 
+  if (shouldEnrol) {
+    return <Enrol setShouldEnrol={setShouldEnrol} />
+  }
 
   if (!isRunning) {
     return <NotRunning setIsRunning={setIsRunning} setHasBeenStartedByCockpit={setHasBeenStartedByCockpit} />;
-  } 
+  }
 
   if (!status) {
     return <Spinner className="spinner" isSVG />;
@@ -74,6 +68,7 @@ export default function Application() {
     return (
       <Page>
         <PageSection>
+        <Button variant="primary" onClick={() => {setShouldEnrol(true)}}>Enrol System</Button>
           <Flex className="flex__header">
             <FlexItem>
               <h1>Local Identity</h1>
