@@ -1,10 +1,12 @@
 import { Page, PageSection, Card, CardTitle, CardBody, Button } from "@patternfly/react-core";
 import cockpit from "cockpit";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom'
 
 
-export default function NotRunning({ setIsRunning, setHasBeenStartedByCockpit }) {
+export default function NotRunning() {
     const [exception, setException] = useState(undefined);
+    const navigate = useNavigate();
 
     return (
         <Page>
@@ -14,7 +16,7 @@ export default function NotRunning({ setIsRunning, setHasBeenStartedByCockpit })
                         Enclave Isn't Running
                     </CardTitle>
                     <CardBody>
-                        <Button variant="primary" onClick={() => startEnclave(setException, setIsRunning, setHasBeenStartedByCockpit)}>Start Enclave</Button>
+                        <Button variant="primary" onClick={() => startEnclave(setException, navigate)}>Start Enclave</Button>
                         <p>{exception?.message ?? ""}</p>
                     </CardBody>
                 </Card>
@@ -23,11 +25,11 @@ export default function NotRunning({ setIsRunning, setHasBeenStartedByCockpit })
     );
 }
 
-function startEnclave(setException, setIsRunning, setHasBeenStartedByCockpit) {
+function startEnclave(setException, navigate) {
+
     cockpit.spawn(["enclave", "start"])
         .then(() => {
-            setIsRunning(true);
-            setHasBeenStartedByCockpit(true);
+            navigate("/");
         })
         .catch(exception => {
             setException(exception);

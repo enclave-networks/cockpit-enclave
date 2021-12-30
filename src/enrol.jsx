@@ -1,13 +1,14 @@
 import { Page, PageSection, Card, CardTitle, CardBody, Button, TextInput } from "@patternfly/react-core";
 import cockpit from "cockpit";
 import React from "react";
+import { useNavigate } from 'react-router-dom'
 
 //will display the same message if not running need to check if a profile file exists for enrol /etc/enclave/profiles
 
 let errorMessage = "";
 let textInputValue = "";
 
-export default function Enrol({ shouldEnrolDispatch }) {
+export default function Enrol() {
     return (
         <Page>
             <PageSection>
@@ -18,7 +19,7 @@ export default function Enrol({ shouldEnrolDispatch }) {
                     <CardBody>
                         {/* <input onChange={handleTextInputChange} type="text" id="enrolmentKey" name="enrolmentKey" /> */}
                         <TextInput onChange={handleTextInputChange} type="text" aria-label="enrol text" />
-                        <Button variant="primary" onClick={() => enrol(textInputValue, shouldEnrolDispatch)}>Enrol System</Button>
+                        <Button variant="primary" onClick={() => enrol(textInputValue)}>Enrol System</Button>
                         <p>{errorMessage}</p>
                     </CardBody>
                 </Card>
@@ -27,19 +28,20 @@ export default function Enrol({ shouldEnrolDispatch }) {
     );
 }
 
-function enrol(value, shouldEnrolDispatch) {
+function enrol(value) {
+    const navigate = useNavigate();
     cockpit
         .spawn(['enclave', 'enrol', value], { superuser: "require" })
         .then(() => {
-            shouldEnrolDispatch({type: 'default'});
+            navigate("/")
         })
         .catch(err => {
             errorMessage = 'Error enrolling system please run "enclave enrol" in the terminal';
-            shouldEnrolDispatch({type: 'default'});
             console.log(err);
+            navigate("/");
         });
 }
 
-function handleTextInputChange(value){
+function handleTextInputChange(value) {
     textInputValue = value;
 }
