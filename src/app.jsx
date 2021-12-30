@@ -22,7 +22,11 @@ export default function Application() {
   const [status, setStatus] = useState(undefined);
   const [isRunning, setIsRunning] = useState(true);
   const [hasBeenStartedByCockpit, setHasBeenStartedByCockpit] = useState(false);
-  const [shouldEnrol, setShouldEnrol] = useState(false);
+  // const [shouldEnrol, setShouldEnrol] = useState(false);
+
+  //TODO: Implement react router to avoid this horrid state changing
+  const [shouldEnrol, shouldEnrolDispatch] = useReducer(reducer, false);
+
 
   useEffect(() => {
     setInterval(() => {
@@ -44,10 +48,10 @@ export default function Application() {
           setIsRunning(false);
         });
     }, 2000);
-  }, []);
+  });
 
   if (shouldEnrol) {
-    return <Enrol setShouldEnrol={setShouldEnrol} />
+    return <Enrol shouldEnrolDispatch={shouldEnrolDispatch} />
   }
 
   if (!isRunning) {
@@ -67,7 +71,7 @@ export default function Application() {
     return (
       <Page>
         <PageSection>
-          <Button variant="primary" onClick={() => { setShouldEnrol(true) }}>Enrol System</Button>
+          <Button variant="primary" onClick={() => { shouldEnrolDispatch({type: 'enrol'}) }}>Enrol System</Button>
           <Flex className="flex__header">
             <FlexItem>
               <h1>Local Identity</h1>
@@ -102,4 +106,15 @@ export default function Application() {
 
 function removeDiscoveryFromArray(status) {
   return status.Peers.filter(obj => obj.Description !== "discover.enclave.io");
+}
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'enrol':
+      return true;
+    case 'default':
+      return false; 
+    default:
+      return state;
+  }
 }
