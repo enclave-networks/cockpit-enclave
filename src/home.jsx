@@ -21,7 +21,6 @@ const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON
 
 export default function Home() {
     const [status, setStatus] = useState(undefined);
-    const [hasBeenStartedByCockpit, setHasBeenStartedByCockpit] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,17 +29,8 @@ export default function Home() {
                 .then(result => {
                     result.Peers = removeDiscoveryFromArray(result);
                     setStatus(result);
-
-                    // Set a 1 second timeout to avoid reloading the getStatus before the service is up
-                    if (hasBeenStartedByCockpit) {
-                        setTimeout(setHasBeenStartedByCockpit(false), 1000);
-                    }
                 })
                 .catch(err => {
-                    if (hasBeenStartedByCockpit) {
-                        return;
-                    }
-
                     navigate("/not-running");
                 });
         }, 2000);
