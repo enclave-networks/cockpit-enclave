@@ -3,7 +3,6 @@ import cockpit from "cockpit";
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom'
 
-
 export default function NotRunning() {
     const [exception, setException] = useState(undefined);
     const navigate = useNavigate();

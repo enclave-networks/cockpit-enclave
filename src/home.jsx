@@ -14,8 +14,6 @@ import {
     Button,
 } from "@patternfly/react-core";
 import PeerTable from './peer-table.jsx';
-// import NotRunning from "./not-running.jsx";
-// import Enrol from "./enrol.jsx";
 
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
 

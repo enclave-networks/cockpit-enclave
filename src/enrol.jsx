@@ -17,7 +17,6 @@ export default function Enrol() {
                         Please Enter an Enrolment Key
                     </CardTitle>
                     <CardBody>
-                        {/* <input onChange={handleTextInputChange} type="text" id="enrolmentKey" name="enrolmentKey" /> */}
                         <TextInput onChange={handleTextInputChange} type="text" aria-label="enrol text" />
                         <Button variant="primary" onClick={() => enrol(textInputValue)}>Enrol System</Button>
                         <p>{errorMessage}</p>
