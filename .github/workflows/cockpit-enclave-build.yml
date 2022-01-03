@@ -32,7 +32,7 @@ jobs:
     - name: Install Node Modules
       run: npm i
 
-    - name: Run Make
+    - name: Get patternfly library
       run: |
         git fetch --depth=1 https://github.com/cockpit-project/cockpit.git 253; \
         git checkout --force FETCH_HEAD -- pkg/lib; \
