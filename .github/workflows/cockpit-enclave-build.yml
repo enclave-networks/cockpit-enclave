@@ -10,12 +10,24 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    outputs:
+        buildVersion: ${{ steps.gitversion.outputs.AssemblySemVer }}
+        channel: ${{ steps.version.outputs.channel }}
 
     steps:
-
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+
+    - name: Determine Channel
+      id: version
+      run: |
+        export CHANNEL=stable
+        if [[ "${GITHUB_REF}" != *master ]]
+        then
+            CHANNEL=unstable
+        fi
+        echo "::set-output name=channel::$CHANNEL"
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
@@ -60,13 +72,79 @@ jobs:
         sed -i 's/{{version}}/${{ steps.gitversion.outputs.AssemblySemVer }}/g' ./build/deb/DEBIAN/control
         dpkg -b ./build/deb ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
-    - name: Archive build packages
+    - name: Upload rpm package
       uses: actions/upload-artifact@v2
       with:
-        name: cockpit-enclave-files
-        path: |
-          ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
-          ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+        name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+        path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+
+    - name: Upload deb package
+      uses: actions/upload-artifact@v2
+      with:
+        name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+        path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+
+
+
+  update-deb-repo:
+    needs: build
+    name: Update Deb Repo
+    runs-on: repo-runner
+
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: cockpit-enclave-${{needs.build.outputs.buildVersion}}.deb
+        path: debs/
+
+    - uses: enclave-networks/.github/generate-deb-repo@v1
+      with:
+        packageLocation: debs
+        fabricChannel: ${{needs.build.outputs.channel}}
+        aws-s3-access-key-id: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
+        aws-s3-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
+        private_package_access_token: ${{ secrets.PRIVATE_PACKAGE_ACCESS_TOKEN }}
+        deb_package_gpg_key: ${{secrets.DEB_PACKAGE_GPG_KEY}}
+        deb_package_gpg_passphrase: ${{secrets.DEB_PACKAGE_GPG_PASSPHRASE}}
+
+  update-rpm-repo:
+    needs: build
+    runs-on: repo-runner
+    container:
+      image: fedora:35
+      volumes:
+        - /pkg:/pkg
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: cockpit-enclave-${{needs.build.outputs.fabricBuildVersion}}.noarch.rpm
+        path: rpm/
+
+
+    - uses: enclave-networks/.github/generate-rpm-repo@v1
+      with:
+        packageLocation: rpm
+        fabricChannel: ${{needs.build.outputs.channel}}
+        aws-s3-access-key-id: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
+        aws-s3-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
+  
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: cockpit-enclave-${{needs.build.outputs.buildVersion}}.deb
+        path: packages/
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: cockpit-enclave-${{needs.build.outputs.fabricBuildVersion}}.noarch.rpm
+        path: packages/
 
     - name: Create Release 
       id: create_release   
@@ -75,8 +153,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ steps.gitversion.outputs.AssemblySemVer }}
-        release_name: Release v${{ steps.gitversion.outputs.AssemblySemVer }}
+        tag_name: v${{ needs.build.outputs.fabricBuildVersion }}
+        release_name: Release v${{ needs.build.outputs.fabricBuildVersion }}
         body: Latest SDK API Release
 
     - name: Upload RPM Release Asset        
@@ -86,8 +164,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
-        asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+        asset_path: packages/cockpit-enclave-${{ needs.build.outputs.fabricBuildVersion }}.noarch.rpm
+        asset_name: cockpit-enclave-${{ needs.build.outputs.fabricBuildVersion }}.noarch.rpm
         asset_content_type: application/octet-stream
 
     - name: Upload Deb Release Asset        
@@ -97,6 +175,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
-        asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+        asset_path: packages/cockpit-enclave-${{ needs.build.outputs.fabricBuildVersion }}.deb
+        asset_name: cockpit-enclave-${{ needs.build.outputs.fabricBuildVersion }}.deb
         asset_content_type: application/octet-stream    
