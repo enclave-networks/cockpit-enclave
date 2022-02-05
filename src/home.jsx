@@ -14,6 +14,7 @@ import {
     Button,
 } from "@patternfly/react-core";
 import PeerTable from './peer-table.jsx';
+import constants from './constants.js';
 
 const getStatus = () => cockpit.spawn(["enclave", "status", "--json"]).then(JSON.parse);
 
@@ -29,7 +30,7 @@ export default function Home() {
                     setStatus(result);
                 })
                 .catch(err => {
-                    navigate("/not-running");
+                    navigate(`${constants.urlPrefix}/not-running`);
                 });
         }, 2000);
         return () => {
@@ -52,7 +53,7 @@ export default function Home() {
         return (
             <Page>
                 <PageSection>
-                    <Button variant="primary" component={props => <Link {...props} to="/enrol" />}>Enrol System</Button>
+                    <Button variant="primary" component={props => <Link {...props} to={`${constants.urlPrefix}/enrol`} />}>Enrol System</Button>
                     <Flex className="flex__header">
                         <FlexItem>
                             <h1>Local Identity</h1>
