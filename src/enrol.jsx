@@ -2,6 +2,8 @@ import { Page, PageSection, Card, CardTitle, CardBody, Button, TextInput } from 
 import cockpit from "cockpit";
 import React from "react";
 import { useNavigate } from 'react-router-dom'
+import { createRoute } from './routeHelper.js';
+
 
 //will display the same message if not running need to check if a profile file exists for enrol /etc/enclave/profiles
 
@@ -32,12 +34,12 @@ function enrol(value) {
     cockpit
         .spawn(['enclave', 'enrol', value], { superuser: "require" })
         .then(() => {
-            navigate("/")
+            navigate(createRoute("/"))
         })
         .catch(err => {
             errorMessage = 'Error enrolling system please run "enclave enrol" in the terminal';
             console.log(err);
-            navigate("/");
+            navigate(createRoute("/"))
         });
 }
 

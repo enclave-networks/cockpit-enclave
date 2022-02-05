@@ -2,6 +2,7 @@ import { Page, PageSection, Card, CardTitle, CardBody, Button } from "@patternfl
 import cockpit from "cockpit";
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom'
+import { createRoute } from "./routeHelper.js";
 
 export default function NotRunning() {
     const [exception, setException] = useState(undefined);
@@ -28,7 +29,7 @@ function startEnclave(setException, navigate) {
 
     cockpit.spawn(["enclave", "start"])
         .then(() => {
-            navigate("/");
+            navigate(createRoute("/"))
         })
         .catch(exception => {
             setException(exception);
