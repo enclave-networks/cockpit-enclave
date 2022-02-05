@@ -1,7 +1,17 @@
-import { Page, PageSection, Card, CardTitle, CardBody, Button, TextInput } from "@patternfly/react-core";
+import {
+    Page,
+    PageSection,
+    Card,
+    CardTitle,
+    CardBody,
+    Button,
+    TextInput,
+    Grid,
+    GridItem
+} from "@patternfly/react-core";
 import cockpit from "cockpit";
 import React from "react";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { createRoute } from './routeHelper.js';
 
 
@@ -19,9 +29,17 @@ export default function Enrol() {
                         Please Enter an Enrolment Key
                     </CardTitle>
                     <CardBody>
+
                         <TextInput onChange={handleTextInputChange} type="text" aria-label="enrol text" />
-                        <Button variant="primary" onClick={() => enrol(textInputValue)}>Enrol System</Button>
                         <p>{errorMessage}</p>
+                        <Grid>
+                            <GridItem span={1}>
+                                <Button variant="primary" onClick={() => enrol(textInputValue)}>Enrol System</Button>
+                            </GridItem>
+                            <GridItem span={1}>
+                                <Button variant="primary" component={props => <Link {...props} to={createRoute("/")} />}>Cancel</Button>
+                            </GridItem>
+                        </Grid>
                     </CardBody>
                 </Card>
             </PageSection>
