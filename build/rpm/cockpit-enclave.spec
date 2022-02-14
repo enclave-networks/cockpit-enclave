@@ -27,5 +27,5 @@ cp -r * $RPM_BUILD_ROOT/%{_datadir}/cockpit/enclave
 
 
 %changelog
-* Wed Dec 08 2021 Thomas Soulard <t.soulard@live.co.uk>
+* Wed Dec 08 2021 Enclave Networks <support@enclave.io>
 - First version being packaged

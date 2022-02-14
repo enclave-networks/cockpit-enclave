@@ -1,0 +1,5 @@
+cockpit-enclave (0.1.8.0) stable; urgency=medium
+
+  * First version being packaged
+
+ -- Enclave Networks <support@enclave.io>  Mon, 7 Feb 2022 16:25:20 +0000
