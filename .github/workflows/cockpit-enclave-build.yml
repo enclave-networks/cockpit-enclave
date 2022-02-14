@@ -68,6 +68,14 @@ jobs:
           ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
           ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
+    - name: Dispatch Private Build Event
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: ph-fritsche/action-dispatch@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        type: repository
+        ident: private-build
+
     # - name: Create Release 
     #   id: create_release   
     #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
