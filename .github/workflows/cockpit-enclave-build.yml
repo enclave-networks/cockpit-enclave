@@ -171,7 +171,7 @@ jobs:
     - name: Repository Dispatch
       uses: peter-evans/repository-dispatch@v1
       with:
-        token: ${{ secrets.PRIVATE_REPO_ACCESS_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         event-type: private-build
         client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
