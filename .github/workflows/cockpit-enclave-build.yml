@@ -68,35 +68,35 @@ jobs:
           ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
           ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
-    - name: Create Release 
-      id: create_release   
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ steps.gitversion.outputs.AssemblySemVer }}
-        release_name: Release v${{ steps.gitversion.outputs.AssemblySemVer }}
-        body: Latest SDK API Release
+    # - name: Create Release 
+    #   id: create_release   
+    #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: v${{ steps.gitversion.outputs.AssemblySemVer }}
+    #     release_name: Release v${{ steps.gitversion.outputs.AssemblySemVer }}
+    #     body: Latest SDK API Release
 
-    - name: Upload RPM Release Asset        
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
-        asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
-        asset_content_type: application/octet-stream
+    # - name: Upload RPM Release Asset        
+    #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+    #     asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+    #     asset_content_type: application/octet-stream
 
-    - name: Upload Deb Release Asset        
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
-        asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
-        asset_content_type: application/octet-stream
+    # - name: Upload Deb Release Asset        
+    #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+    #     asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+    #     asset_content_type: application/octet-stream
