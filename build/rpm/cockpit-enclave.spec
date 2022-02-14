@@ -1,5 +1,5 @@
 Name: cockpit-enclave
-Version: %{version}
+Version: 0.1.9.0
 Release: 1%{?dist}
 Summary: An Enclave plugin for Cockpit
 BuildArch: noarch

@@ -57,7 +57,7 @@ jobs:
       run: |
         mkdir -p build/deb/usr/share/cockpit/enclave
         cp -r dist/. build/deb/usr/share/cockpit/enclave
-        sed -i 's/{{version}}/${{ steps.gitversion.outputs.AssemblySemVer }}/g' ./build/deb/DEBIAN/control
+        sed -i 's/{{version}}/${{ steps.gitversion.outputs.AssemblySemVer }}/g' ./build/deb/debian/control
         dpkg -b ./build/deb ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
 
     - name: Archive build packages
