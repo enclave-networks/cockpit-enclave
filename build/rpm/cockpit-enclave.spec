@@ -8,7 +8,7 @@ License: GPL
 
 Source0: %{name}-%{version}.tar.gz
 
-Requires: cockpit bash
+Requires: cockpit bash enclave
 
 %description
 A plugin to monitor Enclave in cockpit

@@ -4,4 +4,4 @@ Maintainer: Enclave <support@enclave.io>
 Description: A plugin to monitor Enclave in cockpit
 Homepage: https://github.com/enclave-networks/cockpit-enclave
 Architecture: all
-Depends: cockpit
+Depends: cockpit enclave
