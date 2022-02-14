@@ -7,7 +7,7 @@ on:
     branches: [ develop, main ]
 
 jobs:
-build:
+  build:
     runs-on: ubuntu-latest
     outputs:
         buildVersion: ${{ steps.gitversion.outputs.AssemblySemVer }}
