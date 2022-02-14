@@ -168,14 +168,12 @@ jobs:
     # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-    - name: Dispatch Private Build Event
-      uses: ph-fritsche/action-dispatch@v1
+    - name: Repository Dispatch
+      uses: peter-evans/repository-dispatch@v1
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        type: repository
-        ident: private-build
-        payload: '{"ref":"${{github.ref}}"}' # json
-
+        token: ${{ secrets.PRIVATE_REPO_ACCESS_TOKEN }}
+        event-type: private-build
+        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
     # - name: Create Release 
     #   id: create_release   
