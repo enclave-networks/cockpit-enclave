@@ -99,4 +99,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
         asset_name: cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
-        asset_content_type: application/octet-stream    
+        asset_content_type: application/octet-stream
