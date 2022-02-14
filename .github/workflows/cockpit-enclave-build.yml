@@ -7,15 +7,26 @@ on:
     branches: [ develop, main ]
 
 jobs:
-  build:
-
+build:
     runs-on: ubuntu-latest
+    outputs:
+        buildVersion: ${{ steps.gitversion.outputs.AssemblySemVer }}
+        channel: ${{ steps.version.outputs.channel }}
 
     steps:
-
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+
+    - name: Determine Channel
+      id: version
+      run: |
+        export CHANNEL=stable
+        if [[ "${GITHUB_REF}" != *main ]]
+        then
+           CHANNEL=unstable
+        fi
+        echo "::set-output name=channel::$CHANNEL"
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
@@ -42,34 +53,122 @@ jobs:
     - name: Webpack Build
       run: npx webpack
 
-    - name: build RPM package
-      run: |
-        mkdir cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
-        cp -r dist/. cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
-        tar --create --file cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}
-        mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/BUILDROOT ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
-        cp build/rpm/cockpit-enclave.spec ~/rpmbuild/SPECS
-        cp cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.tar.gz ~/rpmbuild/SOURCES
-        rpmbuild -bb --define="version ${{ steps.gitversion.outputs.AssemblySemVer }}" ~/rpmbuild/SPECS/cockpit-enclave.spec
-        cp -r ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}-1.noarch.rpm ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
+    - name: Create Dist Tarball
+      run: tar -czvf cockpit-enclave.tar.gz dist/
 
-    - name: Build DEB Package
+    - name: Upload dist Tar
+      uses: actions/upload-artifact@v2
+      with:
+        name: cockpit-enclave.tar.gz
+        path: ./cockpit-enclave.tar.gz
+
+  build-deb:
+    needs: [build]
+    name: Build Deb
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: cockpit-enclave.tar.gz
+
+    - name: Install Dependencies
+      run: sudo apt install devscripts -y
+
+    - name: Extract Tarball
+      run: tar -xf cockpit-enclave.tar.gz
+
+    - name: Update Changelog
+      run: |
+        ls build/deb
+        cd build/deb/debian
+        dch -U -v "${{ needs.build.outputs.buildVersion }}" --package "cockpitenclave" -D "stable" "Enclave ${{ needs.build.outputs.buildVersion }}" --check-dirname-level 0
+        cd ../../..
+
+    - name: Build Deb Package
       run: |
         mkdir -p build/deb/usr/share/cockpit/enclave
         cp -r dist/. build/deb/usr/share/cockpit/enclave
-        sed -i 's/{{version}}/${{ steps.gitversion.outputs.AssemblySemVer }}/g' ./build/deb/debian/control
-        dpkg -b ./build/deb ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+        sed -i 's/{{version}}/${{ needs.build.outputs.buildVersion }}/g' ./build/deb/debian/control
+        mkdir -p build/deb/DEBIAN
+        cp build/deb/debian/* ./build/deb/DEBIAN/
+        dpkg -b ./build/deb ./cockpit-enclave-${{ needs.build.outputs.buildVersion }}.deb
 
-    - name: Archive build packages
+    - name: Upload Deb package
       uses: actions/upload-artifact@v2
       with:
-        name: cockpit-enclave-files
-        path: |
-          ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.noarch.rpm
-          ./cockpit-enclave-${{ steps.gitversion.outputs.AssemblySemVer }}.deb
+        name: cockpit-enclave-${{ needs.build.outputs.buildVersion }}.deb
+        path: ./cockpit-enclave-${{ needs.build.outputs.buildVersion }}.deb
 
+    - name: Upload Deb changelog
+      uses: actions/upload-artifact@v2
+      with:
+        name: changelog
+        path: build/debian/changelog
+        retention-days: 3        
+
+  build-rpm:
+    needs: [build]
+    name: Build RPM
+    runs-on: ubuntu-latest
+
+    container: fedora:35
+    steps:    
+    - name: Install RPM Build
+      run: sudo dnf install rpm-build systemd-rpm-macros rpmdevtools -y
+
+    - uses: actions/checkout@v2
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: cockpit-enclave.tar.gz
+
+    - name: Extract Tarball
+      run: tar -xf cockpit-enclave.tar.gz
+
+    - name: Create Source Tarball
+      run: |
+        mkdir cockpit-enclave-${{ needs.build.outputs.buildVersion }}
+        cp -r dist/. cockpit-enclave-${{ needs.build.outputs.buildVersion }}
+        tar --create --file cockpit-enclave-${{ needs.build.outputs.buildVersion }}.tar.gz cockpit-enclave-${{ needs.build.outputs.buildVersion }}
+
+    - name: Update RPM Spec
+      run: rpmdev-bumpspec --comment="Test Build" --userstring="Enclave Networks <support@enclave.io>" -n "${{needs.build.outputs.buildVersion}}" build/rpm/cockpit-enclave.spec
+
+    - name: Setup RPM Folders
+      run: |
+        mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/BUILDROOT ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
+        cp build/rpm/cockpit-enclave.spec ~/rpmbuild/SPECS
+        rm -f ~/rpmbuild/SOURCES/*
+        cp cockpit-enclave-${{ needs.build.outputs.buildVersion }}.tar.gz ~/rpmbuild/SOURCES
+
+    - name: build RPM package
+      run: |
+        rpmbuild -bb ~/rpmbuild/SPECS/cockpit-enclave.spec
+        cp -r ~/rpmbuild/RPMS/noarch/cockpit-enclave-${{ needs.build.outputs.buildVersion }}-*.noarch.rpm ./cockpit-enclave-${{ needs.build.outputs.buildVersion }}.noarch.rpm
+
+    - name: Upload rpm package
+      uses: actions/upload-artifact@v2
+      with:
+        name: cockpit-enclave-${{ needs.build.outputs.buildVersion }}.noarch.rpm
+        path: ./cockpit-enclave-${{ needs.build.outputs.buildVersion }}.noarch.rpm
+    
+    - name: Upload RPM Spec File
+      uses: actions/upload-artifact@v2
+      with:
+        name: cockpit-enclave.spec
+        path: build/rpm/cockpit-enclave.spec
+        retention-days: 1
+
+        
+  start-private-action:
+    needs: [build-deb, build-rpm]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
     - name: Dispatch Private Build Event
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: ph-fritsche/action-dispatch@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
