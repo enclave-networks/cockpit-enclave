@@ -105,7 +105,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: changelog
-        path: build/debian/changelog
+        path: build/deb/debian/changelog
         retention-days: 3        
 
   build-rpm:
@@ -163,6 +163,7 @@ jobs:
 
         
   start-private-action:
+    name: Start Private Action
     needs: [build-deb, build-rpm]
     runs-on: ubuntu-latest
     # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -173,7 +174,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         event-type: private-build
-        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "run_id": "${{ github.run_id }}"}'
 
     # - name: Create Release 
     #   id: create_release   
