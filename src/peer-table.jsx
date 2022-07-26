@@ -37,19 +37,10 @@ export default function PeerTable(props) {
 
 
 function CreateTableRows(peer, rowIndex) {
-  const isOddRow = (rowIndex + 1) % 2;
-  const customStyle = {
-    borderLeft: "3px solid var(--pf-global--primary-color--100)",
-  };
-
   return (
-    <Tr
-      key={rowIndex}
-      className={isOddRow ? "odd-row-class" : "even-row-class"}
-      style={isOddRow ? customStyle : {}}
-    >
+    <Tr key={rowIndex}>
       <Td>{peer.Name}</Td>
-      <Td>{peer.Description}</Td>
+      <Td><b>{peer.Description}</b></Td>
       <Td>{formatEndPoint(peer.Tunnel)}</Td>
       <Td>{peer.Tunnel === null ? "" : formatPing(peer?.RoundTripTime)}</Td>
       <Td>{peer.Tunnel === null ? "" : peer.VirtualAddress}</Td>
@@ -62,9 +53,9 @@ function formatPing(roundTripTime){
     return "";
   }
 
-  let fullNumber = roundTripTime * 100;
+  let ping = (Math.round(roundTripTime * 100)/100).toFixed(2);
 
-  return `${fullNumber.toFixed()}ms`;
+  return `${ping}ms`;
 }
 
 function formatEndPoint(tunnel){
